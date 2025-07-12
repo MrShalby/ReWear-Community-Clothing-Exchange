@@ -7,12 +7,16 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+<<<<<<< HEAD
 # Dependencies
+=======
+>>>>>>> 999bc2e (Add Firebase authentication and database integration)
 node_modules
 dist
 dist-ssr
 *.local
 
+<<<<<<< HEAD
 # Environment variables and secrets
 .env
 .env.local
@@ -35,6 +39,8 @@ firebase-debug.*.log
 bolt-*
 *.bolt
 
+=======
+>>>>>>> 999bc2e (Add Firebase authentication and database integration)
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -45,6 +51,7 @@ bolt-*
 *.njsproj
 *.sln
 *.sw?
+<<<<<<< HEAD
 
 # OS generated files
 Thumbs.db
@@ -70,3 +77,6 @@ email-test.js
 email-test.html
 backend-email-example.js
 firebase-functions-example.js
+=======
+.env
+>>>>>>> 999bc2e (Add Firebase authentication and database integration)

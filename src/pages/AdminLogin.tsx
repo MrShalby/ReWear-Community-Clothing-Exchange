@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
 
-<<<<<<< HEAD
-=======
 // Helper function to get user-friendly error messages
 const getErrorMessage = (error: string) => {
   if (error.includes('user-not-found')) {
-    return 'No account found with this email address.';
+    return 'No admin account found with this email address.';
   } else if (error.includes('wrong-password')) {
     return 'Incorrect password. Please try again.';
   } else if (error.includes('invalid-email')) {
@@ -21,8 +19,7 @@ const getErrorMessage = (error: string) => {
   return 'Invalid email or password.';
 };
 
->>>>>>> 999bc2e (Add Firebase authentication and database integration)
-const Login: React.FC = () => {
+const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -39,34 +36,34 @@ const Login: React.FC = () => {
     try {
       const success = await login(email, password);
       if (success) {
-        navigate('/dashboard');
+        // Check if user is admin
+        // This will be handled by the AuthContext when it loads the user profile
+        navigate('/admin');
       } else {
-        setError('Invalid email or password');
+        setError('Invalid admin credentials');
       }
-<<<<<<< HEAD
-    } catch (err) {
-      setError('An error occurred. Please try again.');
-=======
     } catch (err: any) {
       setError(getErrorMessage(err.message || 'An error occurred. Please try again.'));
->>>>>>> 999bc2e (Add Firebase authentication and database integration)
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-red-50 to-orange-50">
       <div className="max-w-md w-full space-y-8">
         <div>
+          <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-red-100">
+            <ShieldCheckIcon className="h-6 w-6 text-red-600" />
+          </div>
           <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-            Welcome back to ReWear
+            Admin Access
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Sign in to your account to continue swapping
+            Sign in to access the admin panel
           </p>
         </div>
-        <div className="bg-white/80 backdrop-blur-sm p-8 rounded-xl shadow-sm border border-green-100">
+        <div className="bg-white/80 backdrop-blur-sm p-8 rounded-xl shadow-sm border border-red-100">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
@@ -76,7 +73,7 @@ const Login: React.FC = () => {
             
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
+                Admin Email
               </label>
               <input
                 id="email"
@@ -86,14 +83,14 @@ const Login: React.FC = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
-                placeholder="Enter your email"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
+                placeholder="Enter admin email"
               />
             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
+                Admin Password
               </label>
               <div className="relative mt-1">
                 <input
@@ -104,8 +101,8 @@ const Login: React.FC = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 pr-10"
-                  placeholder="Enter your password"
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 pr-10"
+                  placeholder="Enter admin password"
                 />
                 <button
                   type="button"
@@ -121,29 +118,19 @@ const Login: React.FC = () => {
               </div>
             </div>
 
-<<<<<<< HEAD
-            <div className="text-sm text-gray-600">
-              <strong>Demo Credentials:</strong><br />
-              User: any email/password combination<br />
-              Admin: admin@rewear.com / admin
-            </div>
-=======
-
->>>>>>> 999bc2e (Add Firebase authentication and database integration)
-
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-green-500 to-orange-500 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 transition-all duration-200"
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-red-500 to-orange-500 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 transition-all duration-200"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? 'Signing in...' : 'Sign in as Admin'}
             </button>
 
             <div className="text-center">
               <p className="text-sm text-gray-600">
-                Don't have an account?{' '}
-                <Link to="/signup" className="font-medium text-green-600 hover:text-green-500">
-                  Sign up
+                Regular user?{' '}
+                <Link to="/login" className="font-medium text-red-600 hover:text-red-500">
+                  Sign in here
                 </Link>
               </p>
             </div>
@@ -154,4 +141,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login;
+export default AdminLogin; 

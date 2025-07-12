@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "name": "rewear-clothing-exchange",
   "description": "A sustainable clothing exchange platform where users can swap, redeem, and discover amazing clothing items with fellow members.",
   "private": true,
@@ -16,6 +17,12 @@
   ],
   "author": "Your Name",
   "license": "MIT",
+=======
+  "name": "vite-react-typescript-starter",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+>>>>>>> 999bc2e (Add Firebase authentication and database integration)
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -23,9 +30,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@emailjs/browser": "^4.4.1",
     "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
+=======
+    "@headlessui/react": "^2.2.4",
+    "@heroicons/react": "^2.2.0",
+    "firebase": "^11.10.0",
+>>>>>>> 999bc2e (Add Firebase authentication and database integration)
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

@@ -4,7 +4,11 @@ import { useAuth } from '../contexts/AuthContext';
 import { 
   SparklesIcon, 
   UserIcon, 
+<<<<<<< HEAD
   Bars3Icon,    
+=======
+  Bars3Icon, 
+>>>>>>> 999bc2e (Add Firebase authentication and database integration)
   XMarkIcon,
   ArrowRightOnRectangleIcon 
 } from '@heroicons/react/24/outline';

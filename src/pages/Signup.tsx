@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+<<<<<<< HEAD
 import emailjs from '@emailjs/browser';
 
 // Initialize EmailJS
@@ -23,6 +24,25 @@ function getPasswordStrength(password: string) {
 }
 
 const Signup = () => {
+=======
+import SuccessMessage from '../components/SuccessMessage';
+
+// Helper function to get user-friendly error messages
+const getErrorMessage = (error: string) => {
+  if (error.includes('email-already-in-use')) {
+    return 'An account with this email already exists. Please try logging in instead.';
+  } else if (error.includes('weak-password')) {
+    return 'Password is too weak. Please choose a stronger password.';
+  } else if (error.includes('invalid-email')) {
+    return 'Please enter a valid email address.';
+  } else if (error.includes('network')) {
+    return 'Network error. Please check your internet connection.';
+  }
+  return 'An error occurred. Please try again.';
+};
+
+const Signup: React.FC = () => {
+>>>>>>> 999bc2e (Add Firebase authentication and database integration)
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -30,6 +50,7 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+<<<<<<< HEAD
   const { signup } = useAuth();
   const navigate = useNavigate();
 
@@ -74,6 +95,12 @@ const Signup = () => {
     }
   };
 
+=======
+  const [showSuccess, setShowSuccess] = useState(false);
+  const { signup } = useAuth();
+  const navigate = useNavigate();
+
+>>>>>>> 999bc2e (Add Firebase authentication and database integration)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -94,6 +121,7 @@ const Signup = () => {
     try {
       const success = await signup(name, email, password);
       if (success) {
+<<<<<<< HEAD
         // Send welcome email notification
         const emailSent = await sendWelcomeEmail(name, email);
         
@@ -110,6 +138,18 @@ const Signup = () => {
       }
     } catch (err) {
       setError('An error occurred. Please try again.');
+=======
+        // Show success message before redirecting
+        setShowSuccess(true);
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 2000);
+      } else {
+        setError('Failed to create account. Please try again.');
+      }
+    } catch (err: any) {
+      setError(getErrorMessage(err.message || 'An error occurred. Please try again.'));
+>>>>>>> 999bc2e (Add Firebase authentication and database integration)
     } finally {
       setLoading(false);
     }
@@ -134,6 +174,16 @@ const Signup = () => {
               </div>
             )}
             
+<<<<<<< HEAD
+=======
+            {showSuccess && (
+              <SuccessMessage
+                title="Account Created Successfully!"
+                message="Welcome to ReWear! You're now logged in and will be redirected to your dashboard."
+              />
+            )}
+            
+>>>>>>> 999bc2e (Add Firebase authentication and database integration)
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                 Full Name
@@ -196,6 +246,7 @@ const Signup = () => {
                   )}
                 </button>
               </div>
+<<<<<<< HEAD
               {/* Password Strength Indicator */}
               {password && (
                 <div className="mt-2 flex items-center space-x-2">
@@ -221,6 +272,8 @@ const Signup = () => {
                   </div>
                 </div>
               )}
+=======
+>>>>>>> 999bc2e (Add Firebase authentication and database integration)
             </div>
 
             <div>
@@ -263,4 +316,8 @@ const Signup = () => {
   );
 };
 
+<<<<<<< HEAD
 export default Signup;
+=======
+export default Signup;
+>>>>>>> 999bc2e (Add Firebase authentication and database integration)
