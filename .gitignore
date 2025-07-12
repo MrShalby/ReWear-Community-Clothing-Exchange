@@ -1,0 +1,72 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencies
+node_modules
+dist
+dist-ssr
+*.local
+
+# Environment variables and secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# EmailJS configuration
+emailjs-config.js
+emailjs-secrets.js
+
+# Firebase configuration
+firebase-config.js
+firebase-secrets.js
+firebase-debug.log
+firebase-debug.*.log
+
+# Bolt-related files (hide AI generation traces)
+.bolt/
+bolt-*
+*.bolt
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Build outputs
+build/
+out/
+
+# Test files
+coverage/
+.nyc_output/
+
+# Debug files
+emailjs-debug.html
+email-test.js
+email-test.html
+backend-email-example.js
+firebase-functions-example.js
