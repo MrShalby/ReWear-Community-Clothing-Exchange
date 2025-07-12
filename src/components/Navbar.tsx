@@ -84,6 +84,12 @@ const Navbar: React.FC = () => {
                   Login
                 </Link>
                 <Link
+                  to="/admin-login"
+                  className="text-gray-700 hover:text-green-600 transition-colors"
+                >
+                  Admin
+                </Link>
+                <Link
                   to="/signup"
                   className="bg-gradient-to-r from-green-500 to-orange-500 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-shadow"
                 >
@@ -165,6 +171,13 @@ const Navbar: React.FC = () => {
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Login
+                  </Link>
+                  <Link 
+                    to="/admin-login" 
+                    className="text-gray-700 hover:text-green-600 transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Admin
                   </Link>
                   <Link 
                     to="/signup" 

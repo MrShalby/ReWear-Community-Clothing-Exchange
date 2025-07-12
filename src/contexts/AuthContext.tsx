@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { User as FirebaseUser } from 'firebase/auth';
 import { useFirebase } from './FirebaseContext';
 import { signUpUser, signInUser, signOutUser, createDocument, getDocument } from '../config/firebase';
+import { sendWelcomeEmailFallback } from '../services/emailService';
 
 interface User {
   id: string;
@@ -131,6 +132,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const profileResult = await createDocument('users', userProfile, signupResult.user.uid);
         
         if (profileResult.success) {
+          // Send welcome email
+          sendWelcomeEmailFallback({
+            user_name: name,
+            user_email: email,
+            points: 100
+          });
+          
           // User is automatically logged in after signup
           return true;
         } else {

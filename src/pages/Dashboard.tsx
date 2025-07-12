@@ -9,7 +9,6 @@ import {
   CheckCircleIcon,
   ClockIcon 
 } from '@heroicons/react/24/outline';
-import { mockSwapRequests } from '../data/mockData';
 import SuccessMessage from '../components/SuccessMessage';
 import { getDocuments } from '../config/firebase';
 
@@ -18,31 +17,44 @@ const Dashboard: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [userItems, setUserItems] = useState<any[]>([]);
+  const [swapRequests, setSwapRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch user's items from Firebase
+  // Fetch user's items and swap requests from Firebase
   useEffect(() => {
-    const fetchUserItems = async () => {
+    const fetchUserData = async () => {
       if (!user) return;
       
       try {
-        const result = await getDocuments('items', [
+        // Fetch user's items
+        const itemsResult = await getDocuments('items', [
           { field: 'uploaderId', operator: '==', value: user.id }
         ]);
         
-        if (result.success) {
-          setUserItems(result.data || []);
+        if (itemsResult.success) {
+          setUserItems(itemsResult.data || []);
         } else {
-          console.error('Failed to fetch user items:', result.error);
+          console.error('Failed to fetch user items:', itemsResult.error);
+        }
+
+        // Fetch user's swap requests
+        const swapsResult = await getDocuments('swaps', [
+          { field: 'requesterId', operator: '==', value: user.id }
+        ]);
+        
+        if (swapsResult.success) {
+          setSwapRequests(swapsResult.data || []);
+        } else {
+          console.error('Failed to fetch swap requests:', swapsResult.error);
         }
       } catch (error) {
-        console.error('Error fetching user items:', error);
+        console.error('Error fetching user data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUserItems();
+    fetchUserData();
   }, [user]);
 
   useEffect(() => {
@@ -51,23 +63,33 @@ const Dashboard: React.FC = () => {
       setShowSuccessMessage(true);
       // Remove the message from URL
       window.history.replaceState({}, '', '/dashboard');
-      // Refresh the items list
-      if (user) {
-        const fetchUserItems = async () => {
-          try {
-            const result = await getDocuments('items', [
-              { field: 'uploaderId', operator: '==', value: user.id }
-            ]);
-            
-            if (result.success) {
-              setUserItems(result.data || []);
+              // Refresh the items list
+        if (user) {
+          const fetchUserData = async () => {
+            try {
+              // Refresh items
+              const itemsResult = await getDocuments('items', [
+                { field: 'uploaderId', operator: '==', value: user.id }
+              ]);
+              
+              if (itemsResult.success) {
+                setUserItems(itemsResult.data || []);
+              }
+
+              // Refresh swap requests
+              const swapsResult = await getDocuments('swaps', [
+                { field: 'requesterId', operator: '==', value: user.id }
+              ]);
+              
+              if (swapsResult.success) {
+                setSwapRequests(swapsResult.data || []);
+              }
+            } catch (error) {
+              console.error('Error refreshing user data:', error);
             }
-          } catch (error) {
-            console.error('Error refreshing user items:', error);
-          }
-        };
-        fetchUserItems();
-      }
+          };
+          fetchUserData();
+        }
     }
   }, [searchParams, user]);
 
@@ -81,8 +103,6 @@ const Dashboard: React.FC = () => {
       </div>
     );
   }
-
-  const userSwapRequests = mockSwapRequests.filter(request => request.requesterId === user.id);
 
   const stats = [
     {
@@ -101,14 +121,14 @@ const Dashboard: React.FC = () => {
     },
     {
       name: 'Swaps Completed',
-      value: userSwapRequests.filter(req => req.status === 'completed').length,
+      value: swapRequests.filter(req => req.status === 'completed').length,
       icon: CheckCircleIcon,
       color: 'text-purple-600',
       bgColor: 'bg-purple-100'
     },
     {
       name: 'Pending Requests',
-      value: userSwapRequests.filter(req => req.status === 'pending').length,
+      value: swapRequests.filter(req => req.status === 'pending').length,
       icon: ClockIcon,
       color: 'text-orange-600',
       bgColor: 'bg-orange-100'
@@ -268,13 +288,15 @@ const Dashboard: React.FC = () => {
           {/* Swap Requests */}
           <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border border-green-100">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Swap Requests</h2>
-            {userSwapRequests.length > 0 ? (
+            {swapRequests.length > 0 ? (
               <div className="space-y-4">
-                {userSwapRequests.slice(0, 3).map((request) => (
+                {swapRequests.slice(0, 3).map((request) => (
                   <div key={request.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div>
                       <h3 className="font-medium text-gray-900">{request.itemTitle}</h3>
-                      <p className="text-sm text-gray-600">{request.createdAt}</p>
+                      <p className="text-sm text-gray-600">
+                        {request.createdAt?.toDate ? new Date(request.createdAt.toDate()).toLocaleDateString() : 'Recent'}
+                      </p>
                     </div>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       request.status === 'pending' 
@@ -287,7 +309,7 @@ const Dashboard: React.FC = () => {
                     </span>
                   </div>
                 ))}
-                {userSwapRequests.length > 3 && (
+                {swapRequests.length > 3 && (
                   <Link to="/profile" className="text-green-600 hover:text-green-500 text-sm font-medium">
                     View all requests →
                   </Link>

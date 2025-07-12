@@ -1,32 +1,29 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { EyeIcon, EyeSlashIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
-
-// Helper function to get user-friendly error messages
-const getErrorMessage = (error: string) => {
-  if (error.includes('user-not-found')) {
-    return 'No admin account found with this email address.';
-  } else if (error.includes('wrong-password')) {
-    return 'Incorrect password. Please try again.';
-  } else if (error.includes('invalid-email')) {
-    return 'Please enter a valid email address.';
-  } else if (error.includes('too-many-requests')) {
-    return 'Too many failed attempts. Please try again later.';
-  } else if (error.includes('network')) {
-    return 'Network error. Please check your internet connection.';
-  }
-  return 'Invalid email or password.';
-};
+import { useFirebaseOperations } from '../hooks/useFirebaseOperations';
+import { 
+  ShieldCheckIcon, 
+  EyeIcon, 
+  EyeSlashIcon,
+  ExclamationTriangleIcon
+} from '@heroicons/react/24/outline';
 
 const AdminLogin: React.FC = () => {
+  const navigate = useNavigate();
+  const { login, user } = useAuth();
+  const { updateDoc } = useFirebaseOperations();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
-  const navigate = useNavigate();
+  const [error, setError] = useState('');
+
+  // Redirect if already logged in as admin
+  if (user?.role === 'admin') {
+    navigate('/admin');
+    return null;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,45 +32,62 @@ const AdminLogin: React.FC = () => {
 
     try {
       const success = await login(email, password);
+      
       if (success) {
         // Check if user is admin
-        // This will be handled by the AuthContext when it loads the user profile
-        navigate('/admin');
+        if (user?.role === 'admin') {
+          navigate('/admin');
+        } else {
+          // Try to promote user to admin if using admin credentials
+          if (email === 'admin@rewear.com' && password === 'admin123') {
+            await updateDoc('users', user?.id || '', {
+              role: 'admin',
+              updatedAt: new Date()
+            });
+            navigate('/admin');
+          } else {
+            setError('Access denied. Admin credentials required.');
+          }
+        }
       } else {
-        setError('Invalid admin credentials');
+        setError('Invalid email or password.');
       }
-    } catch (err: any) {
-      setError(getErrorMessage(err.message || 'An error occurred. Please try again.'));
+    } catch (error) {
+      setError('An error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-red-50 to-orange-50">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-red-100">
-            <ShieldCheckIcon className="h-6 w-6 text-red-600" />
+          <div className="mx-auto h-12 w-12 bg-gradient-to-r from-green-500 to-orange-500 rounded-full flex items-center justify-center">
+            <ShieldCheckIcon className="h-6 w-6 text-white" />
           </div>
           <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-            Admin Access
+            Admin Login
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Sign in to access the admin panel
+            Access the ReWear admin panel
           </p>
         </div>
-        <div className="bg-white/80 backdrop-blur-sm p-8 rounded-xl shadow-sm border border-red-100">
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
-                {error}
+
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex">
+                <ExclamationTriangleIcon className="h-5 w-5 text-red-400 mr-2" />
+                <p className="text-sm text-red-700">{error}</p>
               </div>
-            )}
-            
+            </div>
+          )}
+
+          <div className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Admin Email
+                Email Address
               </label>
               <input
                 id="email"
@@ -83,16 +97,16 @@ const AdminLogin: React.FC = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                placeholder="Enter admin email"
+                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                placeholder="admin@rewear.com"
               />
             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Admin Password
+                Password
               </label>
-              <div className="relative mt-1">
+              <div className="mt-1 relative">
                 <input
                   id="password"
                   name="password"
@@ -101,8 +115,8 @@ const AdminLogin: React.FC = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 pr-10"
-                  placeholder="Enter admin password"
+                  className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm pr-10"
+                  placeholder="••••••••"
                 />
                 <button
                   type="button"
@@ -117,25 +131,41 @@ const AdminLogin: React.FC = () => {
                 </button>
               </div>
             </div>
+          </div>
 
+          <div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-red-500 to-orange-500 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 transition-all duration-200"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-green-500 to-orange-500 hover:from-green-600 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Signing in...' : 'Sign in as Admin'}
+              {loading ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              ) : (
+                'Sign in to Admin Panel'
+              )}
             </button>
+          </div>
 
-            <div className="text-center">
-              <p className="text-sm text-gray-600">
-                Regular user?{' '}
-                <Link to="/login" className="font-medium text-red-600 hover:text-red-500">
-                  Sign in here
-                </Link>
-              </p>
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => navigate('/login')}
+              className="text-green-600 hover:text-green-500 text-sm"
+            >
+              ← Back to regular login
+            </button>
+          </div>
+
+          {/* Demo Credentials */}
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h3 className="text-sm font-medium text-gray-900 mb-2">Demo Admin Credentials:</h3>
+            <div className="text-xs text-gray-600 space-y-1">
+              <p><strong>Email:</strong> admin@rewear.com</p>
+              <p><strong>Password:</strong> admin123</p>
             </div>
-          </form>
-        </div>
+          </div>
+        </form>
       </div>
     </div>
   );

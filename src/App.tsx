@@ -11,7 +11,9 @@ import AddItem from './pages/AddItem';
 import ItemDetail from './pages/ItemDetail';
 import BrowseItems from './pages/BrowseItems';
 import AdminPanel from './pages/AdminPanel';
+import AdminLogin from './pages/AdminLogin';
 import Profile from './pages/Profile';
+import NotFound from './pages/NotFound';
 
 function App() {
   return (
@@ -29,7 +31,9 @@ function App() {
             <Route path="/item/:id" element={<ItemDetail />} />
             <Route path="/browse" element={<BrowseItems />} />
             <Route path="/admin" element={<AdminPanel />} />
+            <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
         </Router>

@@ -1,32 +1,81 @@
-# ReWear - Sustainable Clothing Exchange Platform
+# ReWear - Community Clothing Exchange Platform
 
-A modern, sustainable clothing exchange platform where users can swap, redeem, and discover amazing clothing items with fellow members. Built with React, TypeScript, and Tailwind CSS.
+A sustainable fashion platform where users can exchange unused clothing items via direct swaps or a point-based system. Built with React, TypeScript, Firebase, and Tailwind CSS.
 
 ## 🌟 Features
 
-- **User Authentication** - Secure signup/login with email verification
-- **Clothing Marketplace** - Browse and list clothing items
-- **Swap System** - Request swaps with other users
-- **Points System** - Earn and redeem points for items
-- **Real-time Notifications** - Email notifications for important events
-- **Admin Panel** - Manage items and user requests
-- **Responsive Design** - Works perfectly on all devices
+### ✅ Completed Features
 
-## 🚀 Tech Stack
+#### **Landing Page**
+- Beautiful hero section with project introduction
+- Featured items carousel with real-time data
+- Call-to-action buttons: "Start Swapping", "Browse Items", "List an Item"
+- Features section highlighting sustainability benefits
+- Responsive design with smooth animations
 
-- **Frontend**: React 18 + TypeScript
-- **Styling**: Tailwind CSS + Headless UI
-- **Routing**: React Router DOM
-- **Email**: EmailJS for notifications
-- **Build Tool**: Vite
-- **Icons**: Heroicons + Lucide React
+#### **User Authentication**
+- Email/password-based signup and login
+- Firebase Auth integration with real-time user state
+- Automatic redirect to dashboard after login
+- User profile management with role-based access
+- Admin login with special credentials
 
-## 📦 Installation
+#### **User Dashboard**
+- Real-time user statistics (points, items listed, swaps completed)
+- Quick action buttons for common tasks
+- Display of user's uploaded items with status
+- Recent swap requests with real-time updates
+- Success messages and loading states
+
+#### **Item Management**
+- **Add New Item**: Complete form with image upload, validation, and Firebase integration
+- **Item Detail Page**: Full item information with image gallery, swap/points options
+- **Browse Items**: Real-time item browsing with search and filtering
+- **Image Handling**: Local previews, Firebase Storage integration, error fallbacks
+
+#### **Swap System**
+- **Direct Swap Requests**: Users can request item swaps with custom messages
+- **Points System**: Redeem items using earned points
+- **Real-time Status**: Track swap request status (pending, completed, rejected)
+- **Firebase Integration**: All swap data stored and synced in real-time
+
+#### **Admin Panel**
+- **Item Moderation**: Approve/reject item listings with notes
+- **Content Management**: Delete inappropriate items
+- **Statistics Dashboard**: View platform metrics and user activity
+- **Role-based Access**: Admin-only features with proper authentication
+
+#### **Profile Management**
+- User statistics and activity tracking
+- Account information display
+- Points balance and transaction history
+- Responsive profile interface
+
+### 🔧 Technical Features
+
+- **Real-time Data**: Firebase Firestore for live updates
+- **Image Storage**: Firebase Storage for item images
+- **Authentication**: Secure user management with Firebase Auth
+- **Responsive Design**: Mobile-first approach with Tailwind CSS
+- **Type Safety**: Full TypeScript implementation
+- **Error Handling**: Comprehensive error states and fallbacks
+- **Loading States**: Smooth loading experiences throughout
+- **Form Validation**: Client-side validation with user feedback
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v16 or higher)
+- npm or yarn
+- Firebase project setup
+
+### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/rewear-clothing-exchange.git
-   cd rewear-clothing-exchange
+   git clone https://github.com/MrShalby/ReWear-Community-Clothing-Exchange.git
+   cd ReWear-Community-Clothing-Exchange/project
    ```
 
 2. **Install dependencies**
@@ -34,136 +83,136 @@ A modern, sustainable clothing exchange platform where users can swap, redeem, a
    npm install
    ```
 
-3. **Set up environment variables**
-   ```bash
-   cp env.example .env
+3. **Environment Setup**
+   - Copy `env.example` to `.env.local`
+   - Fill in your Firebase configuration:
+   ```env
+   VITE_FIREBASE_API_KEY=your_api_key
+   VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
+   VITE_FIREBASE_PROJECT_ID=your_project_id
+   VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+   VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+   VITE_FIREBASE_APP_ID=your_app_id
    ```
-   Then edit `.env` with your actual configuration values.
 
-4. **Start the development server**
+4. **Firebase Setup**
+   - Create a Firebase project
+   - Enable Authentication (Email/Password)
+   - Enable Firestore Database
+   - Enable Storage
+   - Set up security rules (see `FIREBASE_SETUP.md`)
+
+5. **Start Development Server**
    ```bash
    npm run dev
    ```
 
-5. **Open your browser**
-   Navigate to `http://localhost:5173`
-
-## ⚙️ Configuration
-
-### EmailJS Setup
-
-1. Create an account at [EmailJS.com](https://www.emailjs.com/)
-2. Set up an email service (Gmail, Outlook, etc.)
-3. Create an email template with variables:
-   - `{{to_name}}` - User's name
-   - `{{cta_link}}` - Dashboard link
-4. Update your `.env` file with:
-   ```
-   VITE_EMAILJS_PUBLIC_KEY=your_public_key
-   VITE_EMAILJS_SERVICE_ID=your_service_id
-   VITE_EMAILJS_TEMPLATE_ID=your_template_id
+6. **Build for Production**
+   ```bash
+   npm run build
    ```
 
-### Environment Variables
+## 🔥 Firebase Configuration
 
-Copy `env.example` to `.env` and fill in your values:
+### Required Services
 
-```env
-# EmailJS Configuration
-VITE_EMAILJS_PUBLIC_KEY=your_emailjs_public_key_here
-VITE_EMAILJS_SERVICE_ID=your_emailjs_service_id_here
-VITE_EMAILJS_TEMPLATE_ID=your_emailjs_template_id_here
+1. **Authentication**
+   - Enable Email/Password sign-in method
+   - Set up admin user: `admin@rewear.com` / `admin123`
 
-# App Configuration
-VITE_APP_NAME=ReWear
-VITE_APP_URL=http://localhost:5173
-VITE_DASHBOARD_URL=http://localhost:5173/dashboard
-```
+2. **Firestore Database**
+   - Collections: `users`, `items`, `swaps`
+   - Security rules configured for user data protection
 
-## 🎯 Usage
+3. **Storage**
+   - Configure for image uploads
+   - Set up security rules for authenticated users
 
-### For Users
+### Security Rules
 
-1. **Sign Up** - Create an account with your email
-2. **Browse Items** - Explore clothing items from other users
-3. **List Items** - Upload your own clothing items
-4. **Request Swaps** - Send swap requests to other users
-5. **Earn Points** - Complete swaps to earn points
-6. **Redeem Items** - Use points to redeem clothing items
+See `FIREBASE_SETUP.md` for detailed security configuration.
 
-### For Admins
+## 📱 Demo Credentials
 
-1. **Access Admin Panel** - Use admin credentials to access `/admin`
-2. **Approve Items** - Review and approve new clothing listings
-3. **Manage Users** - Monitor user activity and requests
-4. **System Overview** - View platform statistics
+### Regular User
+- **Email**: `user@example.com`
+- **Password**: `password123`
 
-## 🏗️ Project Structure
+### Admin User
+- **Email**: `admin@rewear.com`
+- **Password**: `admin123`
+
+## 🎨 Design Features
+
+- **Modern UI**: Clean, sustainable-themed design
+- **Responsive**: Works perfectly on mobile, tablet, and desktop
+- **Animations**: Smooth transitions and hover effects
+- **Accessibility**: Proper ARIA labels and keyboard navigation
+- **Loading States**: Skeleton screens and progress indicators
+
+## 🔧 Tech Stack
+
+- **Frontend**: React 18 + TypeScript
+- **Styling**: Tailwind CSS
+- **Backend**: Firebase (Auth, Firestore, Storage)
+- **Build Tool**: Vite
+- **Email**: EmailJS (configured but optional)
+- **Icons**: Heroicons
+- **Routing**: React Router v6
+
+## 📁 Project Structure
 
 ```
 src/
 ├── components/          # Reusable UI components
-├── contexts/           # React contexts (Auth, etc.)
-├── data/              # Mock data and interfaces
-├── pages/             # Page components
-├── App.tsx            # Main app component
-└── main.tsx           # App entry point
+├── contexts/           # React contexts (Auth, Firebase)
+├── pages/             # Main application pages
+├── config/            # Firebase configuration
+├── hooks/             # Custom React hooks
+├── services/          # External services (EmailJS)
+├── data/              # Mock data and types
+└── assets/            # Static assets
 ```
-
-## 🔧 Development
-
-### Available Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
-
-### Adding New Features
-
-1. Create components in `src/components/`
-2. Add pages in `src/pages/`
-3. Update routing in `App.tsx`
-4. Add types in `src/data/` if needed
 
 ## 🚀 Deployment
 
 ### Vercel (Recommended)
-
-1. Connect your GitHub repository to Vercel
-2. Set environment variables in Vercel dashboard
-3. Deploy automatically on push to main branch
+1. Connect your GitHub repository
+2. Set environment variables
+3. Deploy automatically
 
 ### Netlify
-
 1. Build the project: `npm run build`
-2. Upload the `dist` folder to Netlify
-3. Set environment variables in Netlify dashboard
+2. Upload the `dist` folder
+3. Configure environment variables
+
+### Firebase Hosting
+1. Install Firebase CLI
+2. Run `firebase init hosting`
+3. Deploy with `firebase deploy`
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Commit your changes: `git commit -m 'Add feature'`
-4. Push to the branch: `git push origin feature-name`
-5. Submit a pull request
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
 
-## 📝 License
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
-- [React](https://reactjs.org/) - UI library
-- [Tailwind CSS](https://tailwindcss.com/) - Styling
-- [EmailJS](https://www.emailjs.com/) - Email service
-- [Heroicons](https://heroicons.com/) - Icons
-- [Vite](https://vitejs.dev/) - Build tool
+- Firebase for backend services
+- Tailwind CSS for styling
+- Heroicons for beautiful icons
+- The sustainable fashion community
 
 ## 📞 Support
 
-If you have any questions or need help, please open an issue on GitHub or contact us at support@rewear.com
+For support or questions, please open an issue on GitHub or contact the development team.
 
 ---
 
-**Made with ❤️ for sustainable fashion** 
+**ReWear** - Making sustainable fashion accessible to everyone! 🌱👕 
