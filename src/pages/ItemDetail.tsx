@@ -35,7 +35,7 @@ const ItemDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user, updateUser } = useAuth();
   const navigate = useNavigate();
-  const { getDocument, updateDoc, createDocument, loading, error } = useFirebaseOperations();
+  const { getDoc, updateDoc, createDoc, loading, error } = useFirebaseOperations();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorited, setIsFavorited] = useState(false);
   const [showSwapModal, setShowSwapModal] = useState(false);
@@ -189,7 +189,7 @@ const ItemDetail: React.FC = () => {
       }
       
       try {
-        const result = await getDocument('items', id);
+        const result = await getDoc('items', id);
         if (result.success && result.data) {
           const itemData = result.data as any;
           setItem({
@@ -209,7 +209,7 @@ const ItemDetail: React.FC = () => {
     };
 
     fetchItem();
-  }, [id, getDocument]);
+  }, [id, getDoc]);
 
   if (itemLoading) {
     return (
@@ -265,7 +265,7 @@ const ItemDetail: React.FC = () => {
         });
 
         // Create swap record
-        await createDocument('swaps', {
+        await createDoc('swaps', {
           itemId: item.id,
           requesterId: user.id,
           requesterName: user.name,
@@ -292,7 +292,7 @@ const ItemDetail: React.FC = () => {
 
     try {
       // Create swap request
-      const swapResult = await createDocument('swaps', {
+      const swapResult = await createDoc('swaps', {
         itemId: item.id,
         requesterId: user.id,
         requesterName: user.name,
