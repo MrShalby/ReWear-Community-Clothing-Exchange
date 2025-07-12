@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { PhotoIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { createDocument, uploadFile } from '../config/firebase';
 
 const AddItem: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: '',
@@ -18,6 +20,17 @@ const AddItem: React.FC = () => {
     tags: '',
     points: 50
   });
+
+  // Cleanup object URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      images.forEach(image => {
+        if (image && image.startsWith('blob:')) {
+          URL.revokeObjectURL(image);
+        }
+      });
+    };
+  }, [images]);
 
   const categories = [
     'Tops & T-Shirts',
@@ -54,43 +67,99 @@ const AddItem: React.FC = () => {
     }));
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      // In a real app, you would upload to a service like Cloudinary
-      // For demo purposes, we'll use placeholder images
-      const newImages = Array.from(files).map((file, index) => 
-        `https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=500&random=${Date.now() + index}`
-      );
-      setImages(prev => [...prev, ...newImages].slice(0, 5)); // Max 5 images
+      setUploadingImages(true);
+      try {
+        // Convert files to data URLs for persistent storage
+        const imagePromises = Array.from(files).map(async (file) => {
+          return new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              resolve(e.target?.result as string);
+            };
+            reader.readAsDataURL(file);
+          });
+        });
+        
+        const dataUrls = await Promise.all(imagePromises);
+        setImages(prev => [...prev, ...dataUrls].slice(0, 5));
+        
+      } catch (error) {
+        console.error('Error uploading images:', error);
+        // Fallback to placeholder images
+        const fallbackImages = Array.from(files).map((file, index) => 
+          `https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=500&random=${Date.now() + index}`
+        );
+        setImages(prev => [...prev, ...fallbackImages].slice(0, 5));
+      } finally {
+        setUploadingImages(false);
+      }
     }
   };
 
   const removeImage = (index: number) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
+    setImages(prev => {
+      const newImages = prev.filter((_, i) => i !== index);
+      // Clean up the object URL to prevent memory leaks
+      if (prev[index] && prev[index].startsWith('blob:')) {
+        URL.revokeObjectURL(prev[index]);
+      }
+      return newImages;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
 
+    // Validate required fields
+    if (!formData.title || !formData.description || !formData.category || !formData.size || !formData.condition) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    if (images.length === 0) {
+      alert('Please upload at least one image of your item.');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // In a real app, this would submit to an API
-      console.log('Submitting item:', {
-        ...formData,
-        images,
+      // Create the item data
+      const itemData = {
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        size: formData.size,
+        condition: formData.condition,
+        tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+        points: formData.points,
+        images: images,
         uploaderId: user.id,
-        uploaderName: user.name
-      });
+        uploaderName: user.name,
+        uploaderEmail: user.email,
+        status: 'available', // available, claimed, completed
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
 
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      navigate('/dashboard');
+      // Save the item to Firestore
+      const result = await createDocument('items', itemData);
+      
+      if (result.success) {
+        console.log('Item listed successfully:', result.id);
+        // Navigate to dashboard with success message
+        navigate('/dashboard?message=item_listed');
+      } else {
+        console.error('Failed to list item:', result.error);
+        alert('Failed to list item. Please try again.');
+      }
     } catch (error) {
       console.error('Error submitting item:', error);
+      alert('An error occurred while listing the item. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -126,6 +195,7 @@ const AddItem: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Images (up to 5)
               </label>
+              <p className="text-xs text-gray-500 mb-2">Images are converted to data URLs for persistent storage</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-4">
                 {images.map((image, index) => (
                   <div key={index} className="relative group">
@@ -133,6 +203,9 @@ const AddItem: React.FC = () => {
                       src={image}
                       alt={`Upload ${index + 1}`}
                       className="w-full h-24 object-cover rounded-lg"
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=500';
+                      }}
                     />
                     <button
                       type="button"
@@ -144,14 +217,28 @@ const AddItem: React.FC = () => {
                   </div>
                 ))}
                 {images.length < 5 && (
-                  <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-green-400 hover:bg-green-50 transition-colors">
-                    <PhotoIcon className="h-8 w-8 text-gray-400" />
-                    <span className="text-xs text-gray-500 mt-1">Add Photo</span>
+                  <label className={`flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 rounded-lg transition-colors ${
+                    uploadingImages 
+                      ? 'border-orange-400 bg-orange-50 cursor-not-allowed' 
+                      : 'hover:border-green-400 hover:bg-green-50 cursor-pointer'
+                  }`}>
+                    {uploadingImages ? (
+                      <>
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500"></div>
+                        <span className="text-xs text-green-600 mt-1">Converting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <PhotoIcon className="h-8 w-8 text-gray-400" />
+                        <span className="text-xs text-gray-500 mt-1">Add Photo</span>
+                      </>
+                    )}
                     <input
                       type="file"
                       multiple
                       accept="image/*"
                       onChange={handleImageUpload}
+                      disabled={uploadingImages}
                       className="hidden"
                     />
                   </label>

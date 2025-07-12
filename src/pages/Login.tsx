@@ -3,8 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
-<<<<<<< HEAD
-=======
 // Helper function to get user-friendly error messages
 const getErrorMessage = (error: string) => {
   if (error.includes('user-not-found')) {
@@ -20,8 +18,6 @@ const getErrorMessage = (error: string) => {
   }
   return 'Invalid email or password.';
 };
-
->>>>>>> 999bc2e (Add Firebase authentication and database integration)
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -43,13 +39,8 @@ const Login: React.FC = () => {
       } else {
         setError('Invalid email or password');
       }
-<<<<<<< HEAD
-    } catch (err) {
-      setError('An error occurred. Please try again.');
-=======
     } catch (err: any) {
       setError(getErrorMessage(err.message || 'An error occurred. Please try again.'));
->>>>>>> 999bc2e (Add Firebase authentication and database integration)
     } finally {
       setLoading(false);
     }
@@ -120,16 +111,6 @@ const Login: React.FC = () => {
                 </button>
               </div>
             </div>
-
-<<<<<<< HEAD
-            <div className="text-sm text-gray-600">
-              <strong>Demo Credentials:</strong><br />
-              User: any email/password combination<br />
-              Admin: admin@rewear.com / admin
-            </div>
-=======
-
->>>>>>> 999bc2e (Add Firebase authentication and database integration)
 
             <button
               type="submit"

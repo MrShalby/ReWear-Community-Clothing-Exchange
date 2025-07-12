@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   PlusIcon, 
@@ -9,10 +9,67 @@ import {
   CheckCircleIcon,
   ClockIcon 
 } from '@heroicons/react/24/outline';
-import { mockItems, mockSwapRequests } from '../data/mockData';
+import { mockSwapRequests } from '../data/mockData';
+import SuccessMessage from '../components/SuccessMessage';
+import { getDocuments } from '../config/firebase';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [userItems, setUserItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch user's items from Firebase
+  useEffect(() => {
+    const fetchUserItems = async () => {
+      if (!user) return;
+      
+      try {
+        const result = await getDocuments('items', [
+          { field: 'uploaderId', operator: '==', value: user.id }
+        ]);
+        
+        if (result.success) {
+          setUserItems(result.data || []);
+        } else {
+          console.error('Failed to fetch user items:', result.error);
+        }
+      } catch (error) {
+        console.error('Error fetching user items:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserItems();
+  }, [user]);
+
+  useEffect(() => {
+    const message = searchParams.get('message');
+    if (message === 'item_listed') {
+      setShowSuccessMessage(true);
+      // Remove the message from URL
+      window.history.replaceState({}, '', '/dashboard');
+      // Refresh the items list
+      if (user) {
+        const fetchUserItems = async () => {
+          try {
+            const result = await getDocuments('items', [
+              { field: 'uploaderId', operator: '==', value: user.id }
+            ]);
+            
+            if (result.success) {
+              setUserItems(result.data || []);
+            }
+          } catch (error) {
+            console.error('Error refreshing user items:', error);
+          }
+        };
+        fetchUserItems();
+      }
+    }
+  }, [searchParams, user]);
 
   if (!user) {
     return (
@@ -25,7 +82,6 @@ const Dashboard: React.FC = () => {
     );
   }
 
-  const userItems = mockItems.filter(item => item.uploaderId === user.id);
   const userSwapRequests = mockSwapRequests.filter(request => request.requesterId === user.id);
 
   const stats = [
@@ -38,7 +94,7 @@ const Dashboard: React.FC = () => {
     },
     {
       name: 'Items Listed',
-      value: userItems.length,
+      value: loading ? '...' : userItems.length,
       icon: SparklesIcon,
       color: 'text-blue-600',
       bgColor: 'bg-blue-100'
@@ -62,6 +118,17 @@ const Dashboard: React.FC = () => {
   return (
     <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
+        {/* Success Message */}
+        {showSuccessMessage && (
+          <div className="mb-6">
+            <SuccessMessage
+              title="Item Listed Successfully!"
+              message="Your item has been added to the marketplace. Other users can now browse and request to swap for it."
+              onClose={() => setShowSuccessMessage(false)}
+            />
+          </div>
+        )}
+
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -120,15 +187,46 @@ const Dashboard: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* My Items */}
           <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-sm border border-green-100">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">My Listed Items</h2>
-            {userItems.length > 0 ? (
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-gray-900">My Listed Items</h2>
+              <button
+                onClick={async () => {
+                  setLoading(true);
+                  try {
+                    const result = await getDocuments('items', [
+                      { field: 'uploaderId', operator: '==', value: user.id }
+                    ]);
+                    if (result.success) {
+                      setUserItems(result.data || []);
+                    }
+                  } catch (error) {
+                    console.error('Error refreshing items:', error);
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                className="text-green-600 hover:text-green-700 transition-colors"
+                disabled={loading}
+              >
+                <ArrowPathIcon className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+            {loading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading your items...</p>
+              </div>
+            ) : userItems.length > 0 ? (
               <div className="space-y-4">
                 {userItems.slice(0, 3).map((item) => (
                   <div key={item.id} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
                     <img
-                      src={item.images[0]}
+                      src={item.images && item.images[0] ? item.images[0] : 'https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=500'}
                       alt={item.title}
                       className="w-12 h-12 object-cover rounded-lg"
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=500';
+                      }}
                     />
                     <div className="flex-1">
                       <h3 className="font-medium text-gray-900">{item.title}</h3>

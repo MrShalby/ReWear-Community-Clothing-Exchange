@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   MagnifyingGlassIcon, 
   FunnelIcon,
   AdjustmentsHorizontalIcon 
 } from '@heroicons/react/24/outline';
-import { mockItems } from '../data/mockData';
+import { getDocuments } from '../config/firebase';
 
 const BrowseItems: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -14,6 +14,8 @@ const BrowseItems: React.FC = () => {
   const [selectedCondition, setSelectedCondition] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   const [showFilters, setShowFilters] = useState(false);
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const categories = [
     'All Categories',
@@ -31,8 +33,31 @@ const BrowseItems: React.FC = () => {
   const sizes = ['All Sizes', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '6', '7', '8', '9', '10', '11', '12'];
   const conditions = ['All Conditions', 'Like New', 'Excellent', 'Very Good', 'Good', 'Fair'];
 
+  // Fetch items from Firebase
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const result = await getDocuments('items', [
+          { field: 'status', operator: '==', value: 'available' }
+        ]);
+        
+        if (result.success) {
+          setItems(result.data || []);
+        } else {
+          console.error('Failed to fetch items:', result.error);
+        }
+      } catch (error) {
+        console.error('Error fetching items:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchItems();
+  }, []);
+
   // Filter and sort items
-  const filteredItems = mockItems
+  const filteredItems = items
     .filter(item => {
       const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -154,12 +179,17 @@ const BrowseItems: React.FC = () => {
         {/* Results */}
         <div className="flex justify-between items-center mb-6">
           <p className="text-gray-600">
-            {filteredItems.length} item{filteredItems.length !== 1 ? 's' : ''} found
+            {loading ? 'Loading items...' : `${filteredItems.length} item${filteredItems.length !== 1 ? 's' : ''} found`}
           </p>
         </div>
 
         {/* Items Grid */}
-        {filteredItems.length > 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading items...</p>
+          </div>
+        ) : filteredItems.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredItems.map((item) => (
               <Link
@@ -169,9 +199,12 @@ const BrowseItems: React.FC = () => {
               >
                 <div className="aspect-square overflow-hidden">
                   <img
-                    src={item.images[0]}
+                    src={item.images && item.images[0] ? item.images[0] : 'https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=500'}
                     alt={item.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg?auto=compress&cs=tinysrgb&w=500';
+                    }}
                   />
                 </div>
                 <div className="p-4">

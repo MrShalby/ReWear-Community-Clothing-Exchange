@@ -1,11 +1,7 @@
-<<<<<<< HEAD
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-=======
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User as FirebaseUser } from 'firebase/auth';
 import { useFirebase } from './FirebaseContext';
 import { signUpUser, signInUser, signOutUser, createDocument, getDocument } from '../config/firebase';
->>>>>>> 999bc2e (Add Firebase authentication and database integration)
 
 interface User {
   id: string;
@@ -14,19 +10,13 @@ interface User {
   points: number;
   avatar?: string;
   role: 'user' | 'admin';
-<<<<<<< HEAD
-=======
   createdAt?: Date;
   updatedAt?: Date;
->>>>>>> 999bc2e (Add Firebase authentication and database integration)
 }
 
 interface AuthContextType {
   user: User | null;
-<<<<<<< HEAD
-=======
   loading: boolean;
->>>>>>> 999bc2e (Add Firebase authentication and database integration)
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   signup: (name: string, email: string, password: string) => Promise<boolean>;
@@ -45,50 +35,6 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-<<<<<<< HEAD
-
-  const login = async (email: string, password: string): Promise<boolean> => {
-    // Mock authentication - in real app, this would call an API
-    if (email === 'admin@rewear.com' && password === 'admin') {
-      setUser({
-        id: '1',
-        name: 'Admin User',
-        email: 'admin@rewear.com',
-        points: 500,
-        role: 'admin'
-      });
-      return true;
-    } else if (email && password) {
-      setUser({
-        id: '2',
-        name: 'John Doe',
-        email: email,
-        points: 150,
-        role: 'user'
-      });
-      return true;
-    }
-    return false;
-  };
-
-  const logout = () => {
-    setUser(null);
-  };
-
-  const signup = async (name: string, email: string, password: string): Promise<boolean> => {
-    // Mock signup - in real app, this would call an API
-    if (name && email && password) {
-      setUser({
-        id: Date.now().toString(),
-        name,
-        email,
-        points: 100, // Welcome bonus
-        role: 'user'
-      });
-      return true;
-    }
-    return false;
-=======
   const [loading, setLoading] = useState(true);
   const { user: firebaseUser } = useFirebase();
 
@@ -199,7 +145,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       console.error('Signup error:', error);
       return false;
     }
->>>>>>> 999bc2e (Add Firebase authentication and database integration)
   };
 
   const updateUser = (updates: Partial<User>) => {
@@ -210,10 +155,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const value = {
     user,
-<<<<<<< HEAD
-=======
     loading,
->>>>>>> 999bc2e (Add Firebase authentication and database integration)
     login,
     logout,
     signup,
