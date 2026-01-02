@@ -6,7 +6,7 @@ import { getAnalytics } from 'firebase/analytics';
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyA9d0v5_cMxEIiXdpOZ-myI_Wt2OIZtEEQ",
+  apiKey: "",
   authDomain: "rewear-e565d.firebaseapp.com",
   projectId: "rewear-e565d",
   storageBucket: "rewear-e565d.firebasestorage.app",
